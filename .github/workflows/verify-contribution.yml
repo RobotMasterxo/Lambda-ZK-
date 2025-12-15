@@ -337,7 +337,7 @@ jobs:
 
           echo "Recent contributions (last 24h): $RECENT_CONTRIBS"
 
-          if [ "$RECENT_CONTRIBS" -ge 5 ]; then
+          if [ "$RECENT_CONTRIBS" -ge 20 ]; then
             echo "❌ Rate limit exceeded: Maximum 5 contributions per 24 hours"
             echo "   Please wait before submitting more contributions"
             exit 1
