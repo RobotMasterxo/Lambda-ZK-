@@ -428,6 +428,7 @@ jobs:
       - name: Merge aggregation PR
         uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.BYPASS_TOKEN }}
           script: |
             const prNumber = ${{ needs.aggregate.outputs.pr_number }};
 
@@ -454,44 +455,33 @@ jobs:
             🤖 Automated merge by Lambda-ZK Ceremony`
             });
 
-            // Merge the PR (bypass branch protection - this is a bot PR that already passed all validation)
-            console.log('🔀 Merging PR (bypassing branch protection)...');
+            // Merge the PR using PAT (bypasses branch protection)
+            console.log('🔀 Merging PR...');
 
             try {
-              // Use GraphQL API to bypass branch protection
-              // REST API doesn't support admin bypass, but GraphQL does
-              const mutation = `
-                mutation($pullRequestId: ID!) {
-                  mergePullRequest(input: {
-                    pullRequestId: $pullRequestId,
-                    mergeMethod: SQUASH,
-                    commitHeadline: "[CEREMONY] Process contributions",
-                    commitBody: "✅ Validated ceremony aggregation\\n\\nAutomated merge by Lambda-ZK Ceremony\\n\\nValidation Summary:\\n- PTAU integrity: PASSED\\n- R1CS validation: PASSED\\n- Cryptographic verification: PASSED\\n- Deterministic ordering: MAINTAINED\\n- Checksum manifest: GENERATED\\n\\nWorkflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  }) {
-                    pullRequest {
-                      merged
-                      mergeCommit {
-                        oid
-                      }
-                    }
-                  }
-                }
-              `;
-
-              // Get PR node ID first
-              const { data: pr } = await github.rest.pulls.get({
+              const mergeResult = await github.rest.pulls.merge({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                pull_number: prNumber
-              });
+                pull_number: prNumber,
+                merge_method: 'squash',
+                commit_title: `[CEREMONY] Process contributions (#${prNumber})`,
+                commit_message: `✅ Validated ceremony aggregation
 
-              const mergeResult = await github.graphql(mutation, {
-                pullRequestId: pr.node_id
+            Automated merge by Lambda-ZK Ceremony
+
+            Validation Summary:
+            - PTAU integrity: PASSED
+            - R1CS validation: PASSED
+            - Cryptographic verification: PASSED
+            - Deterministic ordering: MAINTAINED
+            - Checksum manifest: GENERATED
+
+            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`
               });
 
               console.log('✅ PR merged successfully');
-              console.log(`   SHA: ${mergeResult.mergePullRequest.pullRequest.mergeCommit.oid}`);
-              console.log(`   Merged: ${mergeResult.mergePullRequest.pullRequest.merged}`);
+              console.log(`   SHA: ${mergeResult.data.sha}`);
+              console.log(`   Merged: ${mergeResult.data.merged}`);
 
               // Delete the branch
               try {
