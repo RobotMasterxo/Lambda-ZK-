@@ -389,7 +389,7 @@ jobs:
             *Automated verification by Lambda-ZK Ceremony*`
             });
 
-      - name: Enable auto-merge for verified contribution
+      - name: Approve verified contribution
         if: success()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -399,15 +399,13 @@ jobs:
 
           PR_NUMBER="${{ github.event.pull_request.number }}"
 
-          echo "✅ All validations passed - enabling auto-merge for PR #$PR_NUMBER"
+          echo "✅ All validations passed - approving PR #$PR_NUMBER"
 
-          # Enable auto-merge (will merge when branch protection requirements are met)
-          gh pr merge "$PR_NUMBER" \
-            --auto \
-            --squash \
-            --delete-branch \
+          # Approve the PR (if auto-merge is enabled in repo settings, it will merge automatically)
+          gh pr review "$PR_NUMBER" \
+            --approve \
             --repo ${{ github.repository }} \
-            --body "✅ Contribution cryptographically verified and approved for auto-merge.
+            --body "✅ Contribution cryptographically verified and approved.
 
           **Verification Summary:**
           - ✅ Cryptographic validation passed
@@ -416,14 +414,22 @@ jobs:
           - ✅ Rate limiting checks passed
 
           **Next Steps:**
-          This PR will merge automatically once all branch protection requirements are met.
+          If auto-merge is enabled, this PR will merge automatically once all requirements are met.
           The aggregation workflow will then process this contribution and update the ceremony chain.
 
           ---
           🤖 Automated verification by Lambda-ZK Ceremony"
 
-          echo "✅ Auto-merge enabled for PR #$PR_NUMBER"
-          echo "   PR will merge automatically when all checks pass"
+          echo "✅ PR #$PR_NUMBER approved successfully"
+
+          # Optionally try to enable auto-merge (will fail silently if user doesn't have permission)
+          echo "Attempting to enable auto-merge..."
+          if gh pr merge "$PR_NUMBER" --auto --squash --delete-branch --repo ${{ github.repository }} 2>/dev/null; then
+            echo "✅ Auto-merge enabled"
+          else
+            echo "ℹ️  Auto-merge could not be enabled (contributor doesn't have write access)"
+            echo "   PR is approved and can be merged manually or will auto-merge if configured"
+          fi
 
       - name: Post failure comment
         if: failure()
