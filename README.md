@@ -1,8 +1,8 @@
 # Privacy-Preserving Giftcard System
 
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](./LICENSE)
-[![Ceremony CI](https://github.com/RobotMasterxo/test-zk-/actions/workflows/aggregate-ceremony.yml/badge.svg)](https://github.com/Lambda-protocol-monad/Lambda-ZK/actions/workflows/aggregate-ceremony.yml)
-[![Verify Chain](https://github.com/RobotMasterxo/test-zk-/actions/workflows/verify-ceremony.yml/badge.svg)](https://github.com/Lambda-protocol-monad/Lambda-ZK/actions/workflows/verify-ceremony.yml)
+[![Ceremony CI](https://github.com/Lambda-protocol-monad/Lambda-ZK/actions/workflows/verify-ceremony.yml/badge.svg)](https://github.com/Lambda-protocol-monad/Lambda-ZK/actions/workflows/aggregate-ceremony.yml)
+[![Verify Chain](https://github.com/Lambda-protocol-monad/Lambda-ZK/actions/workflows/verify-ceremony.yml/badge.svg)](https://github.com/Lambda-protocol-monad/Lambda-ZK/actions/workflows/verify-ceremony.yml)
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](./CONTRIBUTING.md)
 [![snarkjs](https://img.shields.io/badge/snarkjs-0.7.4-purple.svg)](https://github.com/iden3/snarkjs)
 [![Circom](https://img.shields.io/badge/circom-2.1.9-orange.svg)](https://github.com/iden3/circom)
@@ -42,6 +42,7 @@ The core of this system is the `GiftCardMerkle` circuit (circuits/giftcard_merkl
 ### Circuit Architecture
 
 **Private Inputs:**
+
 - `secret`: User's secret value (never revealed)
 - `salt`: Randomization factor for commitment hiding
 - `amountDeposited`: Total giftcard balance
@@ -51,6 +52,7 @@ The core of this system is the `GiftCardMerkle` circuit (circuits/giftcard_merkl
 - `pathElements[32]` / `pathIndices[32]`: Merkle proof of inclusion
 
 **Public Outputs:**
+
 - `root`: Merkle tree root (validates membership)
 - `nullifierCurrent`: Unique nullifier `Poseidon(secret, amountRequested)` to prevent double-spending
 - `amount`: Withdrawal amount (public for verification)
@@ -91,18 +93,21 @@ This repository hosts an ongoing **Phase 2 trusted setup ceremony** to generate 
 ### Ceremony Security Features
 
 **Cryptographic Validation:**
+
 - PTAU integrity verification against known checksums
 - Per-contribution validation via `snarkjs zkey verify` (5-minute timeout)
 - SHA-256 checksum manifests for all artifacts
 - Filename pattern and index consistency checking
 
 **Audit & Transparency:**
+
 - Timestamped execution logs with millisecond precision
 - GitHub Actions artifact preservation (90-day retention)
 - Deterministic processing order with comprehensive logging
 - Public checksum manifests at `ceremony/output/checksum_manifest.txt`
 
 **Input Safety:**
+
 - Path traversal attack prevention
 - Control character removal and length limits (4096 chars max)
 - File size validation to detect corruption
@@ -141,17 +146,20 @@ Anyone can strengthen the ceremony by contributing random entropy. Only one hone
 ### Contribution Steps
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/your-org/lambda-zk.git
    cd lambda-zk/ceremony/scripts
    ```
 
 2. **Generate your contribution**
+
    ```bash
    ./contribute.sh
    ```
 
    This script:
+
    - Validates the current ceremony state and PTAU integrity
    - Detects the latest verified zkey in `ceremony/output/`
    - Generates your contribution with fresh entropy
@@ -170,6 +178,7 @@ Anyone can strengthen the ceremony by contributing random entropy. Only one hone
 
 **PR Validation:**
 GitHub Actions automatically validates your contribution:
+
 - PTAU integrity verification
 - Circuit compatibility check via `snarkjs zkey verify`
 - Genuine entropy contribution verification
@@ -177,6 +186,7 @@ GitHub Actions automatically validates your contribution:
 
 **Chain Aggregation:**
 Upon PR merge, the CI automatically:
+
 - Integrates contribution into `ceremony/output/`
 - Generates updated SHA-256 checksum manifests
 - Maintains complete chain history
@@ -187,10 +197,12 @@ Upon PR merge, the CI automatically:
 After sufficient contributions, the ceremony is finalized using a public randomness beacon to eliminate any remaining toxic waste.
 
 **Final Artifacts:**
+
 - `ceremony/output/giftcard_merkle_final.zkey` - Production proving key
 - `ceremony/output/giftcard_merkle_verification_key.json` - Verification key for smart contracts
 
 **Run finalization:**
+
 ```bash
 cd ceremony/scripts
 ./final_beacon.sh
@@ -216,6 +228,7 @@ cat ../output/checksum_manifest.txt
 ```
 
 **Verification Coverage:**
+
 - PTAU integrity (checksum + size validation)
 - R1CS circuit file integrity
 - All zkey files via `snarkjs zkey verify`
@@ -225,12 +238,14 @@ cat ../output/checksum_manifest.txt
 
 **Audit Logs:**
 GitHub Actions generates timestamped audit artifacts containing:
+
 - Cryptographic operation documentation (millisecond precision)
 - File validation results with rejection diagnostics
 - Manifest generation and verification status
 - Chain consistency proofs
 
 Example log entry:
+
 ```
 2025-12-09 15:47:48 SECURITY_OK: PTAU integrity verified: e970efa7...
 2025-12-09 15:47:48 VALIDATION_SUCCESS: Contribution #1 cryptographically verified
@@ -242,12 +257,14 @@ Example log entry:
 ### Circuit Security
 
 **Privacy Guarantees:**
+
 - User's `secret` and `salt` never revealed on-chain
 - Merkle tree hides which commitment is being spent (anonymity set of 2^32)
 - Ephemeral keys prevent address linkability between withdrawals
 - Nullifiers prevent double-spending without revealing secret
 
 **Soundness Guarantees:**
+
 - Spending constraint enforced: `spentBefore + amountRequested <= amountDeposited` (circuits/giftcard_merkle.circom:106)
 - Merkle proof ensures commitment exists in tree (circuits/giftcard_merkle.circom:125)
 - Nullifier uniquely binds to withdrawal amount and secret
@@ -256,6 +273,7 @@ Example log entry:
 ### Ceremony Security
 
 **Cryptographic Guarantees:**
+
 - Independent entropy from each participant
 - Automated validation via `snarkjs zkey verify` (300s timeout)
 - Privacy-preserving: coordinators never access private entropy
@@ -263,6 +281,7 @@ Example log entry:
 - Tamper detection via SHA-256 checksums and self-verifying manifests
 
 **Security Architecture:**
+
 - Multi-layered validation (cryptographic, logical, integrity checks)
 - Zero-trust approach assuming potentially malicious participants
 - Deterministic processing order prevents manipulation
@@ -292,12 +311,14 @@ The GiftCardMerkle circuit enables:
 ## Technical Details
 
 **Circuit Statistics:**
+
 - Constraints: ~2,500 (estimated for depth-32 Merkle tree)
 - Public inputs: 9 (root, nullifier, amount, commitment, spending tracking, ephemeral pubkey)
 - Private inputs: 6 + 64 (secret, salt, amounts, ephemeralPrivKey, Merkle path)
 - Proving system: Groth16 (succinct proofs, fast verification)
 
 **Dependencies:**
+
 - Circom 2.x
 - circomlib (Poseidon, BabyJubJub, Comparators)
 - snarkjs 0.7.x
