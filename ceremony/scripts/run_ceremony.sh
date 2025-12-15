@@ -140,20 +140,23 @@ EOF
     # Include PTAU checksum
     if [[ -f "$PTAU_FILE" ]]; then
         ptau_checksum=$(sha256sum "$PTAU_FILE" | awk '{print $1}')
-        echo "PTAU: $PTAU_FILE:$ptau_checksum" >> "$manifest_file"
+        ptau_relative=$(realpath --relative-to="$ROOT_DIR" "$PTAU_FILE")
+        echo "PTAU: $ptau_relative:$ptau_checksum" >> "$manifest_file"
     fi
 
     # Include R1CS checksum if file exists
     if [[ -f "$R1CS_FILE" ]]; then
         r1cs_checksum=$(sha256sum "$R1CS_FILE" | awk '{print $1}')
-        echo "R1CS: $R1CS_FILE:$r1cs_checksum" >> "$manifest_file"
+        r1cs_relative=$(realpath --relative-to="$ROOT_DIR" "$R1CS_FILE")
+        echo "R1CS: $r1cs_relative:$r1cs_checksum" >> "$manifest_file"
     fi
 
     # Include all zkey files in deterministic order
     while IFS= read -r -d '' zkey_file; do
         if [[ -f "$zkey_file" ]]; then
             zkey_checksum=$(sha256sum "$zkey_file" | awk '{print $1}')
-            echo "ZKEY: $zkey_file:$zkey_checksum" >> "$manifest_file"
+            zkey_relative=$(realpath --relative-to="$ROOT_DIR" "$zkey_file")
+            echo "ZKEY: $zkey_relative:$zkey_checksum" >> "$manifest_file"
         fi
     done < <(find "$output_dir" -name "${circuit_name}_*.zkey" -type f -print0 | sort -z)
 
@@ -161,7 +164,8 @@ EOF
     local temp_manifest="/tmp/manifest_temp_$$.txt"
     cp "$manifest_file" "$temp_manifest"
     manifest_checksum=$(sha256sum "$temp_manifest" | awk '{print $1}')
-    echo "MANIFEST: $manifest_file:$manifest_checksum" >> "$manifest_file"
+    manifest_relative=$(realpath --relative-to="$ROOT_DIR" "$manifest_file")
+    echo "MANIFEST: $manifest_relative:$manifest_checksum" >> "$manifest_file"
     rm -f "$temp_manifest"
 
     echo "$(date '+%Y-%m-%d %H:%M:%S') MANIFEST_SUCCESS: Generated manifest at $manifest_file"
