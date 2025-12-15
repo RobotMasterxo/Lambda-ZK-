@@ -1,0 +1,40 @@
+2025-12-15 13:09:32 LOGGING: Comprehensive audit log enabled: ceremony_20251215_130932.log
+╔══════════════════════════════════════════════╗
+║      Lambda-ZK Enhanced Trusted Setup        ║
+║              Security Edition                ║
+╚══════════════════════════════════════════════╝
+2025-12-15 13:09:32 INIT: Lambda-ZK Enhanced Trusted Setup Coordinator v3.0 started
+2025-12-15 13:09:32 INIT: Security features enabled - maintaining adversarial resilience
+2025-12-15 13:09:32 CIRCUIT_OK: R1CS file verified: /opt/monad/test-zk-/circuits/build/giftcard_merkle.r1cs
+2025-12-15 13:09:32 SECURITY_OK: PTAU integrity verified: e970efa7774da80101e0ac336d083ef3339855c98112539338d706b2b89ac694
+2025-12-15 13:09:32 SETUP: Generating initial zkey with enhanced entropy validation
+[32;22m[INFO]  [39;1msnarkJS[0m: Reading r1cs
+[32;22m[INFO]  [39;1msnarkJS[0m: Reading tauG1
+[32;22m[INFO]  [39;1msnarkJS[0m: Reading tauG2
+[32;22m[INFO]  [39;1msnarkJS[0m: Reading alphatauG1
+[32;22m[INFO]  [39;1msnarkJS[0m: Reading betatauG1
+[32;22m[INFO]  [39;1msnarkJS[0m: Circuit hash: 
+		4d058a79 d9357fed 58381aa1 fca322f0
+		019a63ea 08b596f6 e3b826f6 a33e7364
+		1533d27b 49e84c1e ac33d17b c479aa2d
+		3447aec8 31d22f99 065a442d d31a77af
+2025-12-15 13:09:43 VALIDATION_INFO: Numbered file detected: giftcard_merkle_0000.zkey (will be renumbered to 0000 in output/)
+2025-12-15 13:09:43 VALIDATION: Running cryptographic verification for contribution #0
+2025-12-15 13:09:54 VALIDATION_SUCCESS: Contribution #0 cryptographically verified
+2025-12-15 13:09:54 SETUP_SUCCESS: Initial zkey generated and validated: /opt/monad/test-zk-/ceremony/output/giftcard_merkle_0000.zkey
+
+───────────────────────────────────────────────────────────────────────
+2025-12-15 13:09:54 PROCESSING: Scanning for contributions with deterministic ordering
+───────────────────────────────────────────────────────────────────────
+2025-12-15 13:09:54 SCAN_COMPLETE: Found 0 potential contribution files
+
+───────────────────────────────────────────────────────────────────────
+PROCESSING COMPLETE - AUDIT SUMMARY
+───────────────────────────────────────────────────────────────────────
+2025-12-15 13:09:54 SUMMARY: Contributions processed: 0
+2025-12-15 13:09:54 SUMMARY: Contributions rejected: 0
+2025-12-15 13:09:54 SUMMARY: Total contributions found: 0
+2025-12-15 13:09:54 MANIFEST: Generating public checksum manifest
+2025-12-15 13:09:55 MANIFEST_SUCCESS: Generated manifest at /opt/monad/test-zk-/ceremony/output/checksum_manifest.txt
+2025-12-15 13:09:55 STATUS_INFO: No new contributions processed in this run
+2025-12-15 13:09:55 CI_SKIP: No changes to process - exiting cleanly to prevent loops
