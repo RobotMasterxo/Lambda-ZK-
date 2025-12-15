@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  verify-and-merge:
+  verify:
     runs-on: ubuntu-latest
 
     steps:
@@ -389,14 +389,14 @@ jobs:
             *Automated verification by Lambda-ZK Ceremony*`
             });
 
-      - name: Approve and merge verified contribution
+      - name: Approve verified contribution
         if: success()
         uses: actions/github-script@v7
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
 
-            console.log(`✅ All validations passed - approving and merging PR #${prNumber}`);
+            console.log(`✅ All validations passed - approving PR #${prNumber}`);
 
             // Post approval comment
             await github.rest.pulls.createReview({
@@ -413,7 +413,7 @@ jobs:
             - ✅ Rate limiting checks passed
 
             **Next Steps:**
-            This PR will be automatically merged now.
+            This PR will be automatically merged once all status checks complete.
             The aggregation workflow will then process this contribution and update the ceremony chain.
 
             ---
@@ -422,10 +422,46 @@ jobs:
 
             console.log(`✅ PR #${prNumber} approved successfully`);
 
-            // Wait a moment for approval to register
-            await new Promise(resolve => setTimeout(resolve, 2000));
+      - name: Post failure comment
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `## ❌ Contribution Verification Failed
 
-            // Merge the PR directly using squash merge
+            One or more validation checks failed. Please review the workflow logs for details.
+
+            ### Common issues:
+            - **Cryptographic verification failed**: Ensure you used the latest zkey from \`ceremony/output/\` as input
+            - **File validation failed**: Make sure you added exactly one \`.zkey\` file in \`ceremony/contrib/\`
+            - **Rate limit exceeded**: Maximum 5 contributions per 24 hours
+            - **Account too new**: Account must be at least 7 days old
+
+            ### How to fix:
+            1. Review the [workflow run logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            2. Fix the issue locally
+            3. Force-push to this PR branch to re-trigger verification
+
+            ---
+            *Automated verification by Lambda-ZK Ceremony*`
+            });
+
+  merge:
+    runs-on: ubuntu-latest
+    needs: verify
+    if: success()
+
+    steps:
+      - name: Merge verified contribution
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+
             console.log('🔀 Attempting to merge PR...');
 
             try {
@@ -487,31 +523,3 @@ jobs:
 
               throw mergeError; // Fail the workflow
             }
-
-      - name: Post failure comment
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: `## ❌ Contribution Verification Failed
-
-            One or more validation checks failed. Please review the workflow logs for details.
-
-            ### Common issues:
-            - **Cryptographic verification failed**: Ensure you used the latest zkey from \`ceremony/output/\` as input
-            - **File validation failed**: Make sure you added exactly one \`.zkey\` file in \`ceremony/contrib/\`
-            - **Rate limit exceeded**: Maximum 5 contributions per 24 hours
-            - **Account too new**: Account must be at least 7 days old
-
-            ### How to fix:
-            1. Review the [workflow run logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            2. Fix the issue locally
-            3. Force-push to this PR branch to re-trigger verification
-
-            ---
-            *Automated verification by Lambda-ZK Ceremony*`
-            });
