@@ -26,8 +26,13 @@ circuits/build/*.sym
 circuits/build/giftcard*.zkey
 circuits/build/giftcard*_verification_key.json
 
-# PTAU files (they’re big and can be re-downloaded via scripts/CI)
+# PTAU files (they're big and can be re-downloaded via scripts/CI)
 circuits/ptau/*.ptau
+
+# Ceremony logs (contain absolute paths - keep private)
+ceremony/scripts/*.log
+ceremony/scripts/ceremony_*.log
+ceremony/scripts/chain_verification_*.log
 
 # OS junk
 .DS_Store
