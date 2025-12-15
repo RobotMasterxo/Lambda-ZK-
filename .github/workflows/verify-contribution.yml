@@ -389,47 +389,104 @@ jobs:
             *Automated verification by Lambda-ZK Ceremony*`
             });
 
-      - name: Approve verified contribution
+      - name: Approve and merge verified contribution
         if: success()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          set -euo pipefail
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
 
-          PR_NUMBER="${{ github.event.pull_request.number }}"
+            console.log(`✅ All validations passed - approving and merging PR #${prNumber}`);
 
-          echo "✅ All validations passed - approving PR #$PR_NUMBER"
+            // Post approval comment
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              event: 'APPROVE',
+              body: `✅ Contribution cryptographically verified and approved.
 
-          # Approve the PR (if auto-merge is enabled in repo settings, it will merge automatically)
-          gh pr review "$PR_NUMBER" \
-            --approve \
-            --repo ${{ github.repository }} \
-            --body "✅ Contribution cryptographically verified and approved.
+            **Verification Summary:**
+            - ✅ Cryptographic validation passed
+            - ✅ Security checks passed
+            - ✅ Parent zkey validation passed
+            - ✅ Rate limiting checks passed
 
-          **Verification Summary:**
-          - ✅ Cryptographic validation passed
-          - ✅ Security checks passed
-          - ✅ Parent zkey validation passed
-          - ✅ Rate limiting checks passed
+            **Next Steps:**
+            This PR will be automatically merged now.
+            The aggregation workflow will then process this contribution and update the ceremony chain.
 
-          **Next Steps:**
-          If auto-merge is enabled, this PR will merge automatically once all requirements are met.
-          The aggregation workflow will then process this contribution and update the ceremony chain.
+            ---
+            🤖 Automated verification by Lambda-ZK Ceremony`
+            });
 
-          ---
-          🤖 Automated verification by Lambda-ZK Ceremony"
+            console.log(`✅ PR #${prNumber} approved successfully`);
 
-          echo "✅ PR #$PR_NUMBER approved successfully"
+            // Wait a moment for approval to register
+            await new Promise(resolve => setTimeout(resolve, 2000));
 
-          # Optionally try to enable auto-merge (will fail silently if user doesn't have permission)
-          echo "Attempting to enable auto-merge..."
-          if gh pr merge "$PR_NUMBER" --auto --squash --delete-branch --repo ${{ github.repository }} 2>/dev/null; then
-            echo "✅ Auto-merge enabled"
-          else
-            echo "ℹ️  Auto-merge could not be enabled (contributor doesn't have write access)"
-            echo "   PR is approved and can be merged manually or will auto-merge if configured"
-          fi
+            // Merge the PR directly using squash merge
+            console.log('🔀 Attempting to merge PR...');
+
+            try {
+              const mergeResult = await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash',
+                commit_title: `Ceremony contribution #${prNumber}`,
+                commit_message: `✅ Cryptographically verified contribution
+
+            Automated merge by Lambda-ZK Ceremony
+
+            Verification Summary:
+            - Cryptographic validation: PASSED
+            - Security checks: PASSED
+            - Parent zkey validation: PASSED
+            - Rate limiting: PASSED
+
+            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`
+              });
+
+              console.log('✅ PR merged successfully');
+              console.log(`   SHA: ${mergeResult.data.sha}`);
+              console.log(`   Merged: ${mergeResult.data.merged}`);
+
+              // Delete the branch (optional, for cleanup)
+              try {
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${context.payload.pull_request.head.ref}`
+                });
+                console.log('✅ Branch deleted');
+              } catch (deleteError) {
+                console.log('ℹ️  Could not delete branch (may be from fork):', deleteError.message);
+              }
+
+            } catch (mergeError) {
+              console.error('❌ Failed to merge PR:', mergeError.message);
+
+              // Post a comment about the merge failure
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: `⚠️ **Automatic merge failed**
+
+            Your contribution has been **approved** and passed all security checks, but automatic merge failed.
+
+            **Error:** ${mergeError.message}
+
+            **Action Required:**
+            A repository maintainer needs to manually merge this PR.
+
+            ---
+            🤖 Automated verification by Lambda-ZK Ceremony`
+              });
+
+              throw mergeError; // Fail the workflow
+            }
 
       - name: Post failure comment
         if: failure()
