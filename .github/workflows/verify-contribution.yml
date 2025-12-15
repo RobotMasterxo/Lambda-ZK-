@@ -328,6 +328,18 @@ jobs:
 
           echo "🔍 Checking rate limits for user: $AUTHOR"
 
+          # Check if user is a repository owner or collaborator (skip rate limits for them)
+          USER_PERMISSION=$(gh api /repos/${{ github.repository }}/collaborators/$AUTHOR/permission --jq '.permission' 2>/dev/null || echo "none")
+
+          echo "User permission level: $USER_PERMISSION"
+
+          if [[ "$USER_PERMISSION" == "admin" || "$USER_PERMISSION" == "write" ]]; then
+            echo "✅ User is a repository collaborator/owner - skipping rate limits"
+            exit 0
+          fi
+
+          echo "ℹ️  Applying rate limits for external contributor"
+
           # Count merged PRs from this author in the last 24 hours
           RECENT_CONTRIBS=$(gh pr list \
             --repo ${{ github.repository }} \
