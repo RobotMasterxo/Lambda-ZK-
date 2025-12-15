@@ -408,21 +408,20 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Approve and merge aggregation PR
+      - name: Merge aggregation PR
         uses: actions/github-script@v7
         with:
           script: |
             const prNumber = ${{ needs.aggregate.outputs.pr_number }};
 
-            console.log(`✅ Aggregation validation passed - approving PR #${prNumber}`);
+            console.log(`✅ Aggregation validation passed - merging PR #${prNumber}`);
 
-            // Approve the PR
-            await github.rest.pulls.createReview({
+            // Post a comment explaining the merge (can't approve our own PR)
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: prNumber,
-              event: 'APPROVE',
-              body: `✅ Ceremony aggregation validated and approved.
+              issue_number: prNumber,
+              body: `✅ **Ceremony aggregation validated and merged**
 
             **Validation Summary:**
             - ✅ PTAU integrity verified
@@ -431,20 +430,15 @@ jobs:
             - ✅ Deterministic ordering maintained
             - ✅ Checksum manifest generated
 
-            **Next Steps:**
-            This PR will be automatically merged now.
+            **Status:**
+            This PR is being automatically merged now.
 
             ---
-            🤖 Automated approval by Lambda-ZK Ceremony`
+            🤖 Automated merge by Lambda-ZK Ceremony`
             });
 
-            console.log(`✅ PR #${prNumber} approved successfully`);
-
-            // Wait a moment for approval to register
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            // Merge the PR
-            console.log('🔀 Attempting to merge PR...');
+            // Merge the PR directly (can't approve our own PR)
+            console.log('🔀 Merging PR...');
 
             try {
               const mergeResult = await github.rest.pulls.merge({
