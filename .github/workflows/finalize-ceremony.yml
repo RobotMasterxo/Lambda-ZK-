@@ -19,7 +19,7 @@ permissions:
 # This ensures only one finalization can happen at a time
 concurrency:
   group: ceremony-finalization
-  cancel-in-progress: false  # Queue instead of canceling
+  cancel-in-progress: false # Queue instead of canceling
 
 jobs:
   finalize:
@@ -104,6 +104,15 @@ jobs:
           mkdir -p circuits/build
           circom circuits/giftcard_merkle.circom --r1cs --wasm -o circuits/build
           test -f circuits/build/giftcard_merkle.r1cs
+
+      - name: Install system deps (curl, jq)
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y curl jq
+          jq --version
+          curl --version
 
       - name: Run final beacon script
         shell: bash
@@ -194,7 +203,7 @@ jobs:
             Toxic waste has been eliminated via public randomness beacon.
           branch: ceremony-finalize-${{ github.run_id }}
           delete-branch: true
-          title: "[CEREMONY] Finalize with drand beacon (round ${{ steps.drand.outputs.ROUND }})"
+          title: '[CEREMONY] Finalize with drand beacon (round ${{ steps.drand.outputs.ROUND }})'
           body: |
             ## 🎯 Ceremony Finalization
 
