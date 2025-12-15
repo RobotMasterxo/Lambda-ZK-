@@ -285,11 +285,27 @@ done < <(find "$CONTRIB_DIR" -maxdepth 1 -type f \( -name "${CIRCUIT_NAME}_[0-9]
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') SCAN_COMPLETE: Found ${#contrib_files[@]} potential contribution files"
 
+# Determine starting index by finding the highest existing index in output/
+max_existing_index=0
+while IFS= read -r -d '' existing_file; do
+    filename=$(basename "$existing_file")
+    if [[ "$filename" =~ ^${CIRCUIT_NAME}_([0-9]{4})\.zkey$ ]]; then
+        file_index=$((10#${BASH_REMATCH[1]}))  # Force base-10 to avoid octal interpretation
+        if [[ $file_index -gt $max_existing_index ]]; then
+            max_existing_index=$file_index
+        fi
+    fi
+done < <(find "$OUTPUT_DIR" -maxdepth 1 -type f -name "${CIRCUIT_NAME}_[0-9][0-9][0-9][0-9].zkey" -print0 2>/dev/null)
+
+starting_index=$((max_existing_index + 1))
+echo "$(date '+%Y-%m-%d %H:%M:%S') INDEX_INFO: Highest existing index in output/: $max_existing_index"
+echo "$(date '+%Y-%m-%d %H:%M:%S') INDEX_INFO: New contributions will start at index: $starting_index"
+
 # Process each contribution in strict order
 for ((i=0; i<${#contrib_files[@]}; i++)); do
     current_file="${contrib_files[$i]}"
     base_name=$(basename "$current_file")
-    current_index=$((i + 1))
+    current_index=$((starting_index + i))
 
     echo
     echo "$(date '+%Y-%m-%d %H:%M:%S') PROCESSING: Contribution #$current_index - $base_name"
