@@ -1,10 +1,16 @@
 name: Aggregate Ceremony Contributions
 
 on:
+  # Run every 5 minutes to check for new contributions
+  # For production, consider changing to hourly: '0 * * * *'
+  schedule:
+    - cron: '*/5 * * * *'  # Every 5 minutes (testing)
+    # - cron: '0 * * * *'  # Every hour (production) - uncomment and comment above for production
+
+  # Keep push trigger for immediate testing when scripts/circuits change
   push:
     branches: ['main']
     paths:
-      - 'ceremony/contrib/**/*.zkey'
       - 'ceremony/scripts/run_ceremony.sh'
       - 'circuits/build/giftcard_merkle.r1cs'
       - 'circuits/ptau/**'
