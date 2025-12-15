@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Lambda-ZK Enhanced Trusted Setup Coordinator v3.0
+# Lambda-ZK Enhanced Trusted Setup Coordinator 
 # Security Features: PTAU validation, per-contribution verification,
 # deterministic ordering, checksum manifests, input sanitization
 # Maintains full auditability and adversarial security properties
@@ -182,7 +182,7 @@ cat << 'EOF'
 ╚══════════════════════════════════════════════╝
 EOF
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') INIT: Lambda-ZK Enhanced Trusted Setup Coordinator v3.0 started"
+echo "$(date '+%Y-%m-%d %H:%M:%S') INIT: Lambda-ZK Enhanced Trusted Setup Coordinator  started"
 echo "$(date '+%Y-%m-%d %H:%M:%S') INIT: Security features enabled - maintaining adversarial resilience"
 
 # Set up clean, relative paths (don't sanitize these base paths)

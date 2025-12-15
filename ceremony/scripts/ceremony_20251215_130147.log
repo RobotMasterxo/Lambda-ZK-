@@ -1,0 +1,11 @@
+2025-12-15 13:01:47 LOGGING: Comprehensive audit log enabled: ceremony_20251215_130147.log
+╔══════════════════════════════════════════════╗
+║      Lambda-ZK Enhanced Trusted Setup        ║
+║              Security Edition                ║
+╚══════════════════════════════════════════════╝
+2025-12-15 13:01:47 INIT: Lambda-ZK Enhanced Trusted Setup Coordinator started
+2025-12-15 13:01:47 INIT: Security features enabled - maintaining adversarial resilience
+2025-12-15 13:01:47 INIT: Created directory: /opt/monad/test-zk-/circuits/build
+2025-12-15 13:01:47 INIT: Created directory: /opt/monad/test-zk-/circuits/ptau
+2025-12-15 13:01:47 CRITICAL_ERROR: R1CS file missing: /opt/monad/test-zk-/circuits/build/giftcard_merkle.r1cs
+2025-12-15 13:01:47 CRITICAL_ERROR: Compile circuit using 'circom circuits/giftcard_merkle.circom --r1cs --wasm -o circuits/build'

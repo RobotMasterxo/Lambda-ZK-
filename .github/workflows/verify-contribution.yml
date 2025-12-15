@@ -384,7 +384,7 @@ jobs:
             Thank you for contributing to the ceremony! 🎉
 
             ---
-            *Automated verification by Lambda-ZK Ceremony v3.0*`
+            *Automated verification by Lambda-ZK Ceremony *`
             });
 
       - name: Auto-merge verified contribution
@@ -416,7 +416,7 @@ jobs:
           The aggregation workflow will now process this contribution and update the ceremony chain.
 
           ---
-          🤖 Automated merge by Lambda-ZK Ceremony v3.0"
+          🤖 Automated merge by Lambda-ZK Ceremony "
 
           echo "✅ PR #$PR_NUMBER merged successfully"
 
@@ -445,5 +445,5 @@ jobs:
             3. Force-push to this PR branch to re-trigger verification
 
             ---
-            *Automated verification by Lambda-ZK Ceremony v3.0*`
+            *Automated verification by Lambda-ZK Ceremony*`
             });
