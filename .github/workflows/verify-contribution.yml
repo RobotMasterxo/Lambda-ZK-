@@ -10,6 +10,8 @@ on:
 permissions:
   contents: write # Required for merge
   pull-requests: write # Required for comments and merge
+  actions: write # Required for workflow operations
+  checks: write # Required for check runs
 
 # Serialize contribution PRs to prevent race conditions
 concurrency:
@@ -374,7 +376,7 @@ jobs:
             **Rate Limiting:** PASSED ✓
 
             ### Next Steps
-            This PR will be **automatically merged** if all checks pass.
+            Auto-merge has been enabled for this PR. It will be **automatically merged** once all branch protection requirements are met.
 
             After merge, the aggregation workflow will:
             1. Process your contribution into the official ceremony chain
@@ -384,10 +386,10 @@ jobs:
             Thank you for contributing to the ceremony! 🎉
 
             ---
-            *Automated verification by Lambda-ZK Ceremony *`
+            *Automated verification by Lambda-ZK Ceremony*`
             });
 
-      - name: Auto-merge verified contribution
+      - name: Enable auto-merge for verified contribution
         if: success()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -397,14 +399,15 @@ jobs:
 
           PR_NUMBER="${{ github.event.pull_request.number }}"
 
-          echo "✅ All validations passed - merging PR #$PR_NUMBER"
+          echo "✅ All validations passed - enabling auto-merge for PR #$PR_NUMBER"
 
-          # Merge the PR using squash merge
+          # Enable auto-merge (will merge when branch protection requirements are met)
           gh pr merge "$PR_NUMBER" \
+            --auto \
             --squash \
             --delete-branch \
             --repo ${{ github.repository }} \
-            --body "✅ Contribution cryptographically verified and merged automatically.
+            --body "✅ Contribution cryptographically verified and approved for auto-merge.
 
           **Verification Summary:**
           - ✅ Cryptographic validation passed
@@ -413,12 +416,14 @@ jobs:
           - ✅ Rate limiting checks passed
 
           **Next Steps:**
-          The aggregation workflow will now process this contribution and update the ceremony chain.
+          This PR will merge automatically once all branch protection requirements are met.
+          The aggregation workflow will then process this contribution and update the ceremony chain.
 
           ---
-          🤖 Automated merge by Lambda-ZK Ceremony "
+          🤖 Automated verification by Lambda-ZK Ceremony"
 
-          echo "✅ PR #$PR_NUMBER merged successfully"
+          echo "✅ Auto-merge enabled for PR #$PR_NUMBER"
+          echo "   PR will merge automatically when all checks pass"
 
       - name: Post failure comment
         if: failure()
