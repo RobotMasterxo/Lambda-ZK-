@@ -1,6 +1,6 @@
 # Privacy-Preserving Giftcard System
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](./LICENSE)
 [![Ceremony CI](https://github.com/RobotMasterxo/test-zk-/actions/workflows/aggregate-ceremony.yml/badge.svg)](https://github.com/Lambda-protocol-monad/Lambda-ZK/actions/workflows/aggregate-ceremony.yml)
 [![Verify Chain](https://github.com/RobotMasterxo/test-zk-/actions/workflows/verify-ceremony.yml/badge.svg)](https://github.com/Lambda-protocol-monad/Lambda-ZK/actions/workflows/verify-ceremony.yml)
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](./CONTRIBUTING.md)
@@ -305,7 +305,7 @@ The GiftCardMerkle circuit enables:
 
 ## License
 
-MIT License - see [LICENSE](./LICENSE) file for details.
+GPL-3.0 License - see [LICENSE](./LICENSE) file for details.
 
 ## Acknowledgments
 
