@@ -448,13 +448,46 @@ jobs:
             - ✅ Checksum manifest generated
 
             **Status:**
-            This PR is being automatically merged now.
+            Waiting for verify check, then automatically merging...
 
             ---
             🤖 Automated merge by Lambda-ZK Ceremony`
             });
 
-            // Merge the PR directly (can't approve our own PR)
+            // Wait for verify check to appear and pass
+            console.log('⏳ Waiting for verify check to complete...');
+            const maxWaitTime = 180000; // 3 minutes
+            const pollInterval = 5000; // 5 seconds
+            const startTime = Date.now();
+
+            let verifyPassed = false;
+            while (Date.now() - startTime < maxWaitTime) {
+              const { data: checks } = await github.rest.checks.listForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/pull/${prNumber}/head`
+              });
+
+              const verifyCheck = checks.check_runs.find(check => check.name === 'verify');
+
+              if (verifyCheck && verifyCheck.conclusion === 'success') {
+                console.log('✅ Verify check passed!');
+                verifyPassed = true;
+                break;
+              } else if (verifyCheck && verifyCheck.conclusion === 'failure') {
+                console.log('❌ Verify check failed!');
+                throw new Error('Verify check failed');
+              }
+
+              console.log(`⏳ Waiting... (verify check status: ${verifyCheck ? verifyCheck.status : 'not found'})`);
+              await new Promise(resolve => setTimeout(resolve, pollInterval));
+            }
+
+            if (!verifyPassed) {
+              throw new Error('Timeout waiting for verify check');
+            }
+
+            // Merge the PR
             console.log('🔀 Merging PR...');
 
             try {
