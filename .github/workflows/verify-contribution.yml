@@ -21,6 +21,8 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # Skip verification for PRs created by the ceremony bot (aggregation PRs)
+    if: github.event.pull_request.user.login != 'github-actions[bot]' && !startsWith(github.event.pull_request.head.ref, 'ceremony-aggregate-')
 
     steps:
       - name: Checkout PR head from base repo
