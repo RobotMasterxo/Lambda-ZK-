@@ -24,6 +24,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: write
+      checks: write
 
     steps:
       - name: Checkout repository
@@ -371,19 +373,17 @@ jobs:
           # Extract PR number
           PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
 
-          # Enable auto-merge with admin privileges (bypass branch protection)
-          echo "🔄 Enabling auto-merge for PR #$PR_NUMBER with admin bypass..."
+          # Enable auto-merge (will merge when checks pass)
+          echo "🔄 Enabling auto-merge for PR #$PR_NUMBER..."
 
-          if gh pr merge "$PR_NUMBER" --auto --squash --delete-branch --admin 2>/dev/null; then
-            echo "✅ Auto-merge enabled (admin bypass for bot PRs)"
-            echo "   Branch will be auto-deleted after merge"
+          if gh pr merge "$PR_NUMBER" --auto --squash --delete-branch 2>&1; then
+            echo "✅ Auto-merge enabled successfully"
+            echo "   PR will merge automatically when all checks pass"
+            echo "   Branch will be deleted after merge"
           else
-            echo "⚠️ Auto-merge with --admin failed, trying without..."
-            if gh pr merge "$PR_NUMBER" --auto --squash --delete-branch 2>/dev/null; then
-              echo "✅ Auto-merge enabled (will merge when checks pass)"
-            else
-              echo "❌ Auto-merge failed - PR requires manual merge"
-            fi
+            echo "⚠️ Auto-merge could not be enabled automatically"
+            echo "   Please ensure 'Allow auto-merge' is enabled in repository settings"
+            echo "   Or merge the PR manually at: $PR_URL"
           fi
 
           echo "✅ Aggregation PR created successfully"
