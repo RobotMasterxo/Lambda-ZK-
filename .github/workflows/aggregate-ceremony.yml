@@ -7,6 +7,10 @@ on:
     - cron: '*/5 * * * *'  # Every 5 minutes (testing)
     # - cron: '0 * * * *'  # Every hour (production) - uncomment and comment above for production
 
+  # Run verify job on aggregation PRs to satisfy branch protection
+  pull_request:
+    branches: ['main']
+
   # Keep push trigger for immediate testing when scripts/circuits change
   push:
     branches: ['main']
@@ -38,6 +42,8 @@ jobs:
 
   aggregate:
     runs-on: ubuntu-latest
+    # Only run aggregate when NOT triggered by pull_request (i.e., on schedule/push/workflow_dispatch)
+    if: github.event_name != 'pull_request'
     permissions:
       contents: write
       pull-requests: write
