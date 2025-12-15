@@ -294,6 +294,10 @@ jobs:
 
           # Create new branch for aggregation
           BRANCH_NAME="ceremony-aggregate-${{ github.run_id }}"
+
+          # Delete remote branch if it exists (from previous failed run)
+          git push origin --delete "$BRANCH_NAME" 2>/dev/null || true
+
           git checkout -b "$BRANCH_NAME"
 
           # Stage all changes in ceremony/output/ and ceremony/contrib/
@@ -323,9 +327,9 @@ jobs:
           Adversarial security: MAINTAINED (≥1 honest participant)
           Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          # Push branch
+          # Push branch (force push in case of workflow retry)
           echo "🚀 Pushing branch $BRANCH_NAME..."
-          git push -u origin "$BRANCH_NAME"
+          git push -u origin "$BRANCH_NAME" --force
 
           # Create PR with auto-merge
           echo "📋 Creating Pull Request..."
